@@ -13,6 +13,19 @@ document.addEventListener("DOMContentLoaded", () => {
       // Clear loading message
       activitiesList.innerHTML = "";
 
+      // Reset activity select to avoid duplicate options
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
+
+      // helper to make initials from email or name
+      function getInitials(identifier) {
+        const local = String(identifier).split("@")[0].replace(/[._-]+/g, " ").trim();
+        const parts = local.split(" ").filter(Boolean);
+        const initials = (parts.length === 1)
+          ? parts[0].slice(0, 2)
+          : (parts[0][0] + (parts[1] ? parts[1][0] : "") );
+        return initials.toUpperCase();
+      }
+
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
         const activityCard = document.createElement("div");
@@ -24,7 +37,16 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          <div class="participants-section">
+            <p><strong>Participants (${details.participants.length}/${details.max_participants}):</strong></p>
+            ${details.participants && details.participants.length
+              ? `<ul class="participants-list">
+                  ${details.participants.map(p => `<li class="participant-item"><span class="avatar">${getInitials(p)}</span><span class="participant-name">${p}</span></li>`).join("")}
+                </ul>`
+              : `<p class="info">No participants yet.</p>`
+            }
+            <p class="availability"><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          </div>
         `;
 
         activitiesList.appendChild(activityCard);
